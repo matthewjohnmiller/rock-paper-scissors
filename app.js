@@ -120,9 +120,19 @@ function game() {
 
     // Loop through the number of games, and increment the winner's score (assuming there is a winner)
     for (i = 0; i < numGames; i++) {
-        userShape = prompt('Round ' + (i + 1) + ', enter your play:');
-        roundResult = playRound(userShape);
+    
+        // make sure roundResult always begins as undefined
+        // this works, but could use cleaning up... could use numbers in the whoWins function
+        roundResult = undefined;
+
+        // don't let the script continue until the user enters a valid input
+        while (typeof roundResult === 'undefined') {
+            userShape = prompt('Round ' + (i + 1) + ', enter your play:');
+            roundResult = playRound(userShape);
+        }
+
         console.log(roundResult);
+
         if (roundResult.search('win') > -1) {
             userScore++;
         } else if (roundResult.search('lose') > -1) {
