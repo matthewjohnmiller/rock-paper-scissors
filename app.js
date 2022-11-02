@@ -4,6 +4,11 @@ const handShapes = {
     3: 'scissors'
 }
 
+// global constants for game result
+const YOU_WIN = 1;
+const YOU_LOSE = 2;
+const YOU_TIE = 3;
+
 function computerPlay() {
 
     // Selects rock, paper, or scissors at random and returns it as the computer's play
@@ -62,48 +67,51 @@ function titleCase(anyString) {
 function whoWins(userShape, computerShape) {
 
     // Determines who is the winner of an RPS game:
-    // - the USER
-    // - the COMPUTER
-    // - it's a TIE
+    // - the USER (1)
+    // - the COMPUTER (2)
+    // - it's a TIE (3)
 
     let result;
 
-    let strYouWin = 'You win! ' + titleCase(userShape) + ' beats ' + computerShape + '.';
-    let strYouLose = 'You lose! ' + titleCase(computerShape) + ' beats ' + userShape + '.';
-    let strTie = `It's a tie!`
-
     if (userShape === computerShape) {
-        result = strTie;
+        result = YOU_TIE;
     } else if (userShape === 'rock') {
         if (computerShape === 'scissors') {
-            result = strYouWin;
+            result = YOU_WIN;
         } else {
-            result = strYouLose;
+            result = YOU_LOSE;
         }
     } else if (userShape === 'scissors') {
         if (computerShape === 'paper') {
-            result = strYouWin;
+            result = YOU_WIN;
         } else {
-            result = strYouLose;
+            result = YOU_LOSE;
         }
     } else {
         if (computerShape === 'rock') {
-            result = strYouWin;
+            result = YOU_WIN;
         } else {
-            result = strYouLose;
+            result = YOU_LOSE;
         }
     }
 
-    return result;
-
+    return {
+        rResult: result,
+        rUserShape: userShape,
+        rComputerShape: computerShape
+    }
 }
 
-function playRound(userShapeRaw) {
-    let userShape = fixUserShape(userShapeRaw);
+function playRound(roundNumber) {
+    let userShape = fixUserShape(prompt('Round ' + roundNumber + ', enter your play:'));
 
     if (!userShapeIsValid(userShape)) {
         console.log('Invalid input - try again');
-        return;
+        return {
+            rResult: -1,
+            rUserShape: -1,
+            rComputerShape: -1
+        }
     }
 
     return whoWins(userShape, computerPlay());   
@@ -115,30 +123,33 @@ function game() {
     let numGames = 5;
     let winningGames = 3;
 
-    let userShape;
     let roundResult;
 
     // Loop through the number of games, and increment the winner's score (assuming there is a winner)
     for (i = 0; i < numGames; i++) {
-    
+        
         // make sure roundResult always begins as undefined
         // this works, but could use cleaning up... could use numbers in the whoWins function
-        roundResult = undefined;
+        roundResult = -1;
+        let resultDetails;
 
         // don't let the script continue until the user enters a valid input
-        while (typeof roundResult === 'undefined') {
-            userShape = prompt('Round ' + (i + 1) + ', enter your play:');
-            roundResult = playRound(userShape);
+        while (roundResult === -1) {
+            resultDetails = playRound(i + 1);
+            roundResult = resultDetails.rResult;
         }
 
         console.log(roundResult);
 
-        if (roundResult.search('win') > -1) {
+        if (roundResult === YOU_WIN) {
             userScore++;
-        } else if (roundResult.search('lose') > -1) {
+            console.log('You win! ' + titleCase(resultDetails.rUserShape) + ' beats ' + resultDetails.rComputerShape + '.');
+        } else if (roundResult === YOU_LOSE) {
             computerScore++;
+            console.log('You lose! ' + titleCase(resultDetails.rComputerShape) + ' beats ' + resultDetails.rUserShape + '.');
+        } else if (roundResult === YOU_TIE) {
+            console.log(`It's a tie!`);
         }
-
 
         // End the game if someone wins three rounds
         if (userScore === winningGames || computerScore === winningGames) {
